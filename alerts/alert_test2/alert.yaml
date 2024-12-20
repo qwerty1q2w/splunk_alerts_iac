@@ -1,0 +1,26 @@
+description: "This alert monitors super puper crazy guys"
+disabled: False
+search: |
+  index=windows event.code=445 type=super_puper_crazy_guys
+  | iplocation srcip
+  | table _time, user, src_ip
+cron_schedule: "*/15 * * * *"
+throttling:
+  suppress: true
+  period: "60m"
+  fields: ["user", "src_ip"]
+actions:
+  opsgenie_alert_action:
+    enabled: true
+    action.opsgenie_alert_action.param.message: "_time - $result._time$\nuser - $result.user$\nsearch - $result.search$"
+permissions:
+  read:
+    - admin
+    - true-cowboys
+    - kittens
+  write:
+    - admin
+    - true-cowboys
+alert_type: "number of events"
+alert_comparator: "greater than"
+alert_threshold: "0"

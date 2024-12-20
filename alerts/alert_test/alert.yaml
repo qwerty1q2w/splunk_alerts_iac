@@ -1,0 +1,33 @@
+description: "This alert monitors super puper crazy guys"
+disabled: False
+search: |
+  index=windows event.code=445345 type=super_puper_crazy_guys
+  | iplocation srcip
+  | table _time, user, src_ip
+cron_schedule: "*/5 * * * *"
+throttling:
+  suppress: true
+  period: "60m"
+  fields: ["user", "src_ip"]
+actions:
+  opsgenie_alert_action:
+    enabled: true
+    action.opsgenie_alert_action.param.message: "_time - $result._time$\nuser - $result.user$\nsearch - $result.search$"
+  slack:
+   enabled: true
+   action.slack.param.channel: "#alllarm-alerts"
+   action.slack.param.message: "Alert_super puper crazy guys"
+   action.slack.param.attachment: "alert_link"
+   action.slack.param.fields: "event.user,event.src_ip"
+   action.slack.param.webhook_url_override: "https://hooks.slack.com/services/Jnljh*88yljlkjh#hljhlkjnlkjniii"
+permissions:
+  read:
+    - admin
+    - true-cowboys
+    - kittens
+  write:
+    - admin
+    - true-cowboys
+alert_type: "number of events"
+alert_comparator: "greater than"
+alert_threshold: "0"

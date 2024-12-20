@@ -1,0 +1,71 @@
+stages:
+  - test
+  - deploy
+  - deploy-all
+
+variables:
+  IMAGE: python:3.12-alpine3.21
+  VAULT_SERVER_URL: https://vault.dreamcompany.cy
+  VAULT_AUTH_ROLE: alert-secrets-read
+
+# Job to run tests during Merge Requests
+test_job:
+  stage: test
+  image: $IMAGE
+  before_script:
+    - pip install -r requirements.txt
+  script:
+    - python test.py
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+  tags:
+    - test
+
+# Job to deploy when MR is merged into master
+deploy_job:
+  stage: deploy
+  image: $IMAGE
+  id_tokens:
+   VAULT_ID_TOKEN:
+     aud: https://vault.dreamcompany.cy
+  secrets:
+    SPLUNK_ADMIN:
+      vault: true-cowboys/splunk-alerts/splunk_admin@secrets
+      file: true
+
+  before_script:
+    - apk update && apk add --no-cache git
+    - pip install -r requirements.txt
+  script:
+    - python alerts.py --deploy-changed-only
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - alerts/*/*.yaml
+      when: on_success
+    - when: never
+  tags:
+    - test
+
+# Manual job to deploy all
+deploy_all_job:
+  stage: deploy-all
+  image: $IMAGE
+  id_tokens:
+   VAULT_ID_TOKEN:
+     aud: https://vault.dreamcompany.cy
+  secrets:
+    SPLUNK_ADMIN:
+      vault: true-cowboys/splunk-alerts/splunk_admin@secrets
+      file: true
+
+  before_script:
+    - apk update && apk add --no-cache git
+    - pip install -r requirements.txt
+  script:
+    - python alerts.py --deploy-all
+  when: manual
+  allow_failure: true
+  tags:
+    - test

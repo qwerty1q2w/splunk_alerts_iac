@@ -1,0 +1,7 @@
+actions:
+  opsgenie_alert_action:
+    action.opsgenie_alert_action.param.priority: "P3"
+    action.opsgenie_alert_action.param.responders: "team:name:true-cowboys"
+    action.opsgenie_alert_action.param.alert_link: "1"
+    action.opsgenie_alert_action.param.search_query: "1"
+    action.opsgenie_alert_action.param.result_link: "1"
