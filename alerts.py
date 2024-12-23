@@ -185,6 +185,14 @@ def prepare_payload(alert_name, alert_data):
                     if param not in default_action_params and param != "enabled":
                         payload[param] = value
         payload["actions"] = ",".join(actions)
+    if "throttling" in alert_data:
+        throttling = alert_data["throttling"]
+        if throttling.get("suppress", False):
+            payload["alert.suppress"] = True
+            payload["alert.suppress.period"] = throttling.get("period", "60m")
+            suppress_fields = throttling.get("fields", [])
+            if suppress_fields:
+                payload["alert.suppress.fields"] = ",".join(suppress_fields)
 
     # Add other fields from alert_data
     if "dispatch" in alert_data:
